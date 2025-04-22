@@ -90,6 +90,27 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- KONDANNYO ADDITIONS
+
+vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle NeoTree' })
+
+-- Define key mappings for j and k
+vim.keymap.set('', 'j', function()
+  return vim.v.count == 0 and 'gj' or 'j'
+end, { expr = true, silent = true })
+
+vim.keymap.set('', 'k', function()
+  return vim.v.count == 0 and 'gk' or 'k'
+end, { expr = true, silent = true })
+--
+-- Map Ctrl+C to copy to system clipboard in visual mode
+vim.keymap.set('v', '<C-c>', '"+y', { noremap = true, silent = true })
+-- Map Ctrl+V to paste from system clipboard in normal and insert modes
+vim.keymap.set({ 'n', 'i' }, '<C-v>', '<C-r>+', { noremap = true, silent = true })
+-- Map Ctrl+X to cut to system clipboard in visual mode
+vim.keymap.set('v', '<C-x>', '"+d', { noremap = true, silent = true })
+-- END KONDANNYO ADDITIONS
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
@@ -969,12 +990,15 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
+
+  require('custom.split_view').setup(),
+
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   -- { import = 'custom.plugins' },
   --
