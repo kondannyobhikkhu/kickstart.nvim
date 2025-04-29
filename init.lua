@@ -94,6 +94,9 @@ vim.g.maplocalleader = ' '
 
 vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle NeoTree' })
 
+-- Define the folder to search in (modify this path as needed)
+local PGP_Nikaya_folder = vim.fn.expand '~/PGP/Nikayas/' -- Replace with your desired folder path
+
 -- Define key mappings for j and k
 vim.keymap.set('', 'j', function()
   return vim.v.count == 0 and 'gj' or 'j'
@@ -103,12 +106,6 @@ vim.keymap.set('', 'k', function()
   return vim.v.count == 0 and 'gk' or 'k'
 end, { expr = true, silent = true })
 --
--- Map Ctrl+C to copy to system clipboard in visual mode
-vim.keymap.set('v', '<C-c>', '"+y', { noremap = true, silent = true })
--- Map Ctrl+V to paste from system clipboard in normal and insert modes
-vim.keymap.set({ 'n', 'i' }, '<C-v>', '<C-r>+', { noremap = true, silent = true })
--- Map Ctrl+X to cut to system clipboard in visual mode
-vim.keymap.set('v', '<C-x>', '"+d', { noremap = true, silent = true })
 -- END KONDANNYO ADDITIONS
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
@@ -449,6 +446,15 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      -- KONDANNYO ADDED FOR Telescope addition to search PGP files
+      vim.keymap.set('n', '<leader>sp', function()
+        builtin.find_files {
+          cwd = vim.fn.expand(PGP_Nikaya_folder), -- Replace with your desired folder path
+          hidden = true, -- Optional: Include hidden files
+        }
+      end, { desc = '[S]earch [P]GP' })
+      -- END KONDANNYO Additions
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
