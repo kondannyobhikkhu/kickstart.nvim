@@ -97,6 +97,9 @@ vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle Neo
 -- Define the folder to search in (modify this path as needed)
 local PGP_Nikaya_folder = vim.fn.expand '~/PGP/Nikayas/' -- Replace with your desired folder path
 
+-- define path to json for telescope integrated sutta picker
+local json_file_path = '/home/kondannyo/PGP/Nikayas/sutta_metadata_ALL.json'
+
 -- Define key mappings for j and k
 vim.keymap.set('', 'j', function()
   return vim.v.count == 0 and 'gj' or 'j'
@@ -429,7 +432,6 @@ require('lazy').setup({
           },
         },
       }
-
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
@@ -454,6 +456,9 @@ require('lazy').setup({
           hidden = true, -- Optional: Include hidden files
         }
       end, { desc = '[S]earch [P]GP' })
+      vim.keymap.set('n', '<leader>sc', function()
+        require('custom.sutta_navigator').sutta_navigator()
+      end, { desc = 'Sutta Navigator' })
       -- END KONDANNYO Additions
 
       -- Slightly advanced example of overriding default behavior and theme
@@ -999,14 +1004,13 @@ require('lazy').setup({
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
+  require('custom.split_view').setup(),
+  require('custom.sutta_navigator').setup(),
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
-
-  require('custom.split_view').setup(),
-
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  --  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
