@@ -1,0 +1,39 @@
+sutta_navigator.lua Summary (April 30, 2025)
+
+Location: ~/.config/nvim/lua/custom/sutta_navigator.lua
+Purpose: Navigate and search Pali Canon suttas from sutta_metadata_ALL.json in Neovim using vim.ui.select, triggered by <leader>sc.
+
+Functionality:
+- JSON: Reads /home/kondannyo/PGP/Nikayas/sutta_metadata_ALL.json, caching it.
+- Navigation:
+  - Nikaya picker: Lists AN, DN, MN, SN and "Search All Suttas" option.
+  - Division picker: Lists divisions for selected Nikaya, "Search <Nikaya> Suttas", and ".. [Back to Nikaya]".
+  - Subdivision picker: Lists subdivisions, "Search <Nikaya> Suttas", and ".. [Back to Division]".
+  - Sutta picker: Lists suttas, "Search <Nikaya> Suttas", and ".. [Back to Subdivision]".
+  - Sutta selection: Opens sutta file in full-screen mode (:edit).
+- Search: "Search Suttas" option prompts for query (vim.ui.input), fuzzy searches sutta titles/numbers (English/Pali) across all Nikayas or within selected Nikaya, displays results in vim.ui.select.
+- Keybindings (in prompts):
+  - <C-n>: Next item
+  - <C-p>: Previous item
+  - <CR>: Select item
+  - <BS>: Intended for back navigation (not working)
+- DN Handling: Skips empty divisions/subdivisions to suttas.
+
+Known Issues:
+- AN: Sutta selection works (full-screen opening).
+- DN: Shows "NIL" for divisions/subdivisions despite data existing in JSON.
+- <BS>: Does not navigate back (intended to replace <C-b>, which also failed).
+- Search: Functional but not as desired; user wanted Telescope-like search bar to fuzzy search entire tree/subtree at each level (e.g., all suttas at Nikaya level, MN suttas at Division level), not a separate vim.ui.input prompt.
+
+Dependencies:
+- None; uses vim.ui.select and vim.ui.input (no Telescope dependencies like telescope.pickers).
+
+Related Config:
+- init.lua (~/.config/nvim/init.lua):
+  - <leader>sc: require('custom.sutta_navigator').sutta_navigator()
+  - Telescope extensions: ui-select, fzf
+  - require('custom.sutta_navigator').setup()
+
+JSON Assumptions:
+- Array of Nikaya objects: { nikaya, divisions: [{ subdivisions: [{ suttas: [{ sutta_number, sutta_title_english, sutta_title_pali, sutta_path }] }] }]
+- DN may lack divisions/subdivisions.

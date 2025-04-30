@@ -141,7 +141,12 @@ function pickers.division_picker(nikaya_data)
       fuzzy_search(nikaya_data.nikaya)
     end },
   }
-  for _, division in ipairs(nikaya_data.divisions or {}) do
+  local divisions = nikaya_data.divisions or {}
+  if nikaya_data.nikaya == 'DN' and #divisions == 0 then
+    pickers.sutta_picker({ subdivision_data = { suttas = nikaya_data.suttas or {} }, nikaya = nikaya_data.nikaya })
+    return
+  end
+  for _, division in ipairs(divisions) do
     local english = division.english_name or 'Unknown'
     local pali = division.pali_name or 'Unknown'
     table.insert(entries, {
@@ -151,22 +156,12 @@ function pickers.division_picker(nikaya_data)
     })
   end
 
-  -- Map <C-b> for this picker
-  local bufnr = vim.api.nvim_get_current_buf()
-  vim.keymap.set('n', '<C-b>', function()
-    vim.api.nvim_buf_call(bufnr, function()
-      pickers.nikaya_picker()
-    end)
-  end, { buffer = bufnr, silent = true })
-
   vim.ui.select(entries, {
-    prompt = 'Select Division (' .. nikaya_data.nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <C-b>:Back, <CR>:Select)',
+    prompt = 'Select Division (' .. nikaya_data.nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <CR>:Select, <BS>:Back)',
     format_item = function(entry)
       return entry.display
     end,
   }, function(choice)
-    -- Clean up keymap
-    pcall(vim.keymap.del, 'n', '<C-b>', { buffer = bufnr })
     if choice then
       if choice.is_back or choice.is_search then
         choice.action()
@@ -183,14 +178,18 @@ function pickers.subdivision_picker(opts)
   local nikaya = opts.nikaya
   local entries = {
     { is_back = true, display = '.. [Back to Division]', action = function()
-      pickers.division_picker({ nikaya = nikaya, divisions = division_data.parent_divisions or {} })
+      pickers.division_picker({ nikaya = nikaya, divisions = nikaya_data.divisions or {} })
     end },
     { is_search = true, display = 'Search ' .. nikaya .. ' Suttas', action = function()
       fuzzy_search(nikaya)
     end },
   }
-
-  for _, subdivision in ipairs(division_data.subdivisions or {}) do
+  local subdivisions = division_data.subdivisions or {}
+  if nikaya == 'DN' and #subdivisions == 0 then
+    pickers.sutta_picker({ subdivision_data = { suttas = division_data.suttas or {} }, nikaya = nikaya })
+    return
+  end
+  for _, subdivision in ipairs(subdivisions) do
     local english = subdivision.english_name or 'Unknown'
     local pali = subdivision.pali_name or 'Unknown'
     table.insert(entries, {
@@ -200,22 +199,12 @@ function pickers.subdivision_picker(opts)
     })
   end
 
-  -- Map <C-b> for this picker
-  local bufnr = vim.api.nvim_get_current_buf()
-  vim.keymap.set('n', '<C-b>', function()
-    vim.api.nvim_buf_call(bufnr, function()
-      pickers.division_picker({ nikaya = nikaya, divisions = division_data.parent_divisions or {} })
-    end)
-  end, { buffer = bufnr, silent = true })
-
   vim.ui.select(entries, {
-    prompt = 'Select Subdivision (' .. nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <C-b>:Back, <CR>:Select)',
+    prompt = 'Select Subdivision (' .. nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <CR>:Select, <BS>:Back)',
     format_item = function(entry)
       return entry.display
     end,
   }, function(choice)
-    -- Clean up keymap
-    pcall(vim.keymap.del, 'n', '<C-b>', { buffer = bufnr })
     if choice then
       if choice.is_back or choice.is_search then
         choice.action()
@@ -239,11 +228,21 @@ function pickers.sutta_picker(opts)
     end },
   }
 
-  for _, sutta in ipairs(subdivision_data.suttas or {}) do
+  local suttas = subdivision_data.suttas or {}
+  if nikaya == 'AN' then
+    -- Debug AN suttas
+    if #suttas == 0 then
+      vim.notify('No suttas found for AN subdivision', vim.log.levels.WARN)
+    end
+  end
+  for _, sutta in ipairs(suttas) do
     if sutta.sutta_title_english ~= 'error' and sutta.sutta_path then
+      if nikaya == 'AN' and not vim.fn.filereadable(sutta.sutta_path) then
+        vim.notify('Invalid sutta_path for AN: ' .. sutta.sutta_path, vim.log.levels.WARN)
+      end
       local display = string.format(
         '%s: %s / %s (%s)',
-        sutta.sutta_number,
+        sutta.sutta_number or 'Unknown',
         sutta.sutta_title_english or 'Unknown',
         sutta.sutta_title_pali or 'Unknown',
         nikaya
@@ -255,22 +254,12 @@ function pickers.sutta_picker(opts)
     end
   end
 
-  -- Map <C-b> for this picker
-  local bufnr = vim.api.nvim_get_current_buf()
-  vim.keymap.set('n', '<C-b>', function()
-    vim.api.nvim_buf_call(bufnr, function()
-      pickers.subdivision_picker({ division_data = subdivision_data.parent_division or {}, nikaya = nikaya })
-    end)
-  end, { buffer = bufnr, silent = true })
-
   vim.ui.select(entries, {
-    prompt = 'Select Sutta (' .. nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <C-b>:Back, <CR>:Select)',
+    prompt = 'Select Sutta (' .. nikaya .. ') or Search (<C-n>:Next, <C-p>:Prev, <CR>:Select, <BS>:Back)',
     format_item = function(entry)
       return entry.display
     end,
   }, function(choice)
-    -- Clean up keymap
-    pcall(vim.keymap.del, 'n', '<C-b>', { buffer = bufnr })
     if choice then
       if choice.is_back or choice.is_search then
         choice.action()
@@ -283,6 +272,20 @@ end
 
 -- Main entry point
 function M.sutta_navigator()
+  -- Global <BS> mapping for back navigation
+  vim.keymap.set('n', '<BS>', function()
+    vim.ui.select({}, { prompt = '' }, function() end) -- Close current picker
+    local current_picker = vim.b.current_picker or 'nikaya'
+    if current_picker == 'division' then
+      pickers.nikaya_picker()
+    elseif current_picker == 'subdivision' then
+      pickers.division_picker(vim.b.nikaya_data or {})
+    elseif current_picker == 'sutta' then
+      pickers.subdivision_picker(vim.b.subdivision_opts or {})
+    end
+  end, { silent = true })
+
+  vim.b.current_picker = 'nikaya'
   pickers.nikaya_picker()
 end
 
