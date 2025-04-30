@@ -100,6 +100,9 @@ local PGP_Nikaya_folder = vim.fn.expand '~/PGP/Nikayas/' -- Replace with your de
 -- define path to json for telescope integrated sutta picker
 local json_file_path = '/home/kondannyo/PGP/Nikayas/sutta_metadata_ALL.json'
 
+-- Enable break indent
+vim.opt.linebreak = true
+
 -- Define key mappings for j and k
 vim.keymap.set('', 'j', function()
   return vim.v.count == 0 and 'gj' or 'j'
