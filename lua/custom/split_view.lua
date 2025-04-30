@@ -51,7 +51,7 @@ local function sync_cursor_line()
   end
 end
 
--- Function to open a split with two files and enable scrollbind
+-- Function to open a split with two files and sync scroll
 local function open_split(left_type, right_type)
   local base_name, current_type = get_file_info()
 
@@ -89,22 +89,17 @@ local function open_split(left_type, right_type)
   -- Get current line to align both windows
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
-  -- Enable scrollbind for the left window
-  vim.wo.scrollbind = true
-
   -- Open right file in a vertical split
   if right_exists then
     vim.cmd('vsplit ' .. right_file)
     -- Align the right window to the same line
     vim.api.nvim_win_set_cursor(0, {current_line, 0})
-    -- Enable scrollbind for the right window
-    vim.wo.scrollbind = true
     -- Center both windows for better visibility
     vim.cmd('windo normal! zz')
+    -- Synchronize scroll positions
+    vim.cmd('syncbind')
   else
     vim.notify('Right file does not exist: ' .. right_file, vim.log.levels.WARN)
-    -- Disable scrollbind if only one window is open
-    vim.wo.scrollbind = false
     return
   end
 
