@@ -459,7 +459,7 @@ require('lazy').setup({
           hidden = true, -- Optional: Include hidden files
         }
       end, { desc = '[S]earch [P]GP' })
-      vim.keymap.set('n', '<leader>sc', function()
+      vim.keymap.set('n', '<leader>S', function()
         require('custom.sutta_navigator').sutta_navigator()
       end, { desc = 'Sutta Navigator' })
       -- END KONDANNYO Additions

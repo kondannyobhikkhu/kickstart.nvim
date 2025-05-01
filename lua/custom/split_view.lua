@@ -39,14 +39,14 @@ end
 local function sync_cursor_line()
   local current_win = vim.api.nvim_get_current_win()
   local current_line = vim.api.nvim_win_get_cursor(current_win)[1]
-  
+
   -- Get all windows in the current tab
   local windows = vim.api.nvim_tabpage_list_wins(0)
-  
+
   for _, win in ipairs(windows) do
     if win ~= current_win then
       -- Set the cursor to the same line in other window
-      vim.api.nvim_win_set_cursor(win, {current_line, 0})
+      vim.api.nvim_win_set_cursor(win, { current_line, 0 })
     end
   end
 end
@@ -93,11 +93,11 @@ local function open_split(left_type, right_type)
   if right_exists then
     vim.cmd('vsplit ' .. right_file)
     -- Align the right window to the same line
-    vim.api.nvim_win_set_cursor(0, {current_line, 0})
+    vim.api.nvim_win_set_cursor(0, { current_line, 0 })
     -- Center both windows for better visibility
-    vim.cmd('windo normal! zz')
+    vim.cmd 'windo normal! zz'
     -- Synchronize scroll positions
-    vim.cmd('syncbind')
+    vim.cmd 'syncbind'
   else
     vim.notify('Right file does not exist: ' .. right_file, vim.log.levels.WARN)
     return
@@ -105,10 +105,10 @@ local function open_split(left_type, right_type)
 
   -- Set up autocommand group for cursor synchronization
   vim.api.nvim_create_augroup('SyncCursorLine', { clear = true })
-  vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI', 'WinEnter'}, {
+  vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'WinEnter' }, {
     group = 'SyncCursorLine',
     callback = sync_cursor_line,
-    desc = 'Sync cursor line across split windows'
+    desc = 'Sync cursor line across split windows',
   })
 end
 
@@ -129,6 +129,10 @@ M.view_e2_p2 = function()
   open_split('e2', 'p2') -- e2 (English 2) on left, p2 (Pali 2) on right
 end
 
+M.view_p1_e2 = function()
+  open_split('p1', 'e2') -- e2 (English 2) on left, p2 (Pali 2) on right
+end
+
 -- Setup key bindings
 M.setup = function()
   local map = vim.keymap.set
@@ -136,9 +140,10 @@ M.setup = function()
 
   -- Leader key is space
   map('n', '<Space>vo', M.view_e1_p1, vim.tbl_extend('force', opts, { desc = 'View e1 (left) and p1 (right)' }))
-  map('n', '<Space>vv', M.view_e1_e2, vim.tbl_extend('force', opts, { desc = 'View e1 (left) and e2 (right)' }))
+  map('n', '<Space>ve', M.view_e1_e2, vim.tbl_extend('force', opts, { desc = 'View e1 (left) and e2 (right)' }))
   map('n', '<Space>vp', M.view_p1_p2, vim.tbl_extend('force', opts, { desc = 'View p1 (left) and p2 (right)' }))
   map('n', '<Space>vb', M.view_e2_p2, vim.tbl_extend('force', opts, { desc = 'View e2 (left) and p2 (right)' }))
+  map('n', '<Space>vr', M.view_p1_e2, vim.tbl_extend('force', opts, { desc = 'View p1 (left) and e2 (right)' }))
 end
 
 return M
