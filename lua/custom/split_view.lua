@@ -45,8 +45,17 @@ local function sync_cursor_line()
 
   for _, win in ipairs(windows) do
     if win ~= current_win then
-      -- Set the cursor to the same line in other window
-      vim.api.nvim_win_set_cursor(win, { current_line, 0 })
+      -- Get the buffer for the window
+      local buf = vim.api.nvim_win_get_buf(win)
+      -- Get the total number of lines in the buffer
+      local max_lines = vim.api.nvim_buf_line_count(buf)
+      -- Cap the target line at the buffer's maximum
+      local target_line = math.min(current_line, max_lines)
+      -- Set cursor with error handling
+      local ok, err = pcall(vim.api.nvim_win_set_cursor, win, { target_line, 0 })
+      if not ok then
+        vim.notify('Failed to set cursor in window ' .. win .. ': ' .. err, vim.log.levels.WARN)
+      end
     end
   end
 end
@@ -92,24 +101,34 @@ local function open_split(left_type, right_type)
   -- Open right file in a vertical split
   if right_exists then
     vim.cmd('vsplit ' .. right_file)
-    -- Align the right window to the same line
-    vim.api.nvim_win_set_cursor(0, { current_line, 0 })
+    -- Get the buffer for the right window
+    local right_buf = vim.api.nvim_win_get_buf(0)
+    -- Get the total number of lines in the right buffer
+    local max_lines = vim.api.nvim_buf_line_count(right_buf)
+    -- Set cursor to the current line or the last line if current_line exceeds max_lines
+    local target_line = math.min(current_line, max_lines)
+    vim.api.nvim_win_set_cursor(0, { target_line, 0 })
     -- Center both windows for better visibility
     vim.cmd 'windo normal! zz'
     -- Synchronize scroll positions
-    vim.cmd 'syncbind'
+    vim.cmd 'windo set scrollbind'
   else
     vim.notify('Right file does not exist: ' .. right_file, vim.log.levels.WARN)
     return
   end
 
-  -- Set up autocommand group for cursor synchronization
+  -- Set up autocommand group for initial cursor synchronization
   vim.api.nvim_create_augroup('SyncCursorLine', { clear = true })
   vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'WinEnter' }, {
     group = 'SyncCursorLine',
     callback = sync_cursor_line,
     desc = 'Sync cursor line across split windows',
   })
+
+  -- Clear the autocommand after initial setup to rely on scrollbind
+  vim.defer_fn(function()
+    vim.api.nvim_del_augroup_by_name 'SyncCursorLine'
+  end, 100)
 end
 
 -- Specific functions for each combination
@@ -130,7 +149,7 @@ M.view_e2_p2 = function()
 end
 
 M.view_p1_e2 = function()
-  open_split('p1', 'e2') -- e2 (English 2) on left, p2 (Pali 2) on right
+  open_split('p1', 'e2') -- p1 (Pali) on left, e2 (English 2) on right
 end
 
 -- Setup key bindings
