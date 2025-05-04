@@ -93,7 +93,7 @@ vim.g.maplocalleader = ' '
 -- KONDANNYO ADDITIONS
 
 vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle NeoTree' })
-
+vim.keymap.set('n', '<leader>jj', 'terminal jless %<CR>', { desc = 'Open JSON in jless' })
 -- Define the folder to search in (modify this path as needed)
 local PGP_Nikaya_folder = vim.fn.expand '~/PGP/Nikayas/' -- Replace with your desired folder path
 
@@ -862,7 +862,7 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'default',
+        preset = 'super-tab',
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
