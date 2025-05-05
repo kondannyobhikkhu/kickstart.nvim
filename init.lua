@@ -93,7 +93,7 @@ vim.g.maplocalleader = ' '
 -- KONDANNYO ADDITIONS
 
 vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle NeoTree' })
-vim.keymap.set('n', '<leader>jj', 'terminal jless %<CR>', { desc = 'Open JSON in jless' })
+vim.keymap.set('n', '<leader>jl', ':terminal jless %<CR>')
 -- Define the folder to search in (modify this path as needed)
 local PGP_Nikaya_folder = vim.fn.expand '~/PGP/Nikayas/' -- Replace with your desired folder path
 
