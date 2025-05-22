@@ -94,13 +94,13 @@ vim.g.maplocalleader = ' '
 
 vim.keymap.set('n', '<leader>t', '<cmd>Neotree toggle<CR>', { desc = 'Toggle NeoTree' })
 vim.keymap.set('n', '<leader>j', function()
-    local file = vim.fn.expand('%:p') -- Get the full path of the current file
-    if vim.fn.filereadable(file) == 1 and vim.fn.match(file, '\\.json$') >= 0 then
-        -- Launch jless in the default terminal (e.g., xterm, kitty, or your preferred one)
-        vim.fn.system('xterm -e jless ' .. vim.fn.shellescape(file) .. ' &')
-    else
-        print('Not a readable JSON file')
-    end
+  local file = vim.fn.expand '%:p' -- Get the full path of the current file
+  if vim.fn.filereadable(file) == 1 and vim.fn.match(file, '\\.json$') >= 0 then
+    -- Launch jless in the default terminal (e.g., xterm, kitty, or your preferred one)
+    vim.fn.system('xterm -e jless ' .. vim.fn.shellescape(file) .. ' &')
+  else
+    print 'Not a readable JSON file'
+  end
 end, { desc = 'Open current JSON file in jless (external)' })
 
 -- Define the folder to search in (modify this path as needed)
@@ -881,6 +881,12 @@ require('lazy').setup({
         -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
         -- Adjusts spacing to ensure icons are aligned
         nerd_font_variant = 'mono',
+      },
+
+      cmdline = {
+        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+        -- Adjusts spacing to ensure icons are aligned
+        enabled = false,
       },
 
       completion = {

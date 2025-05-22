@@ -36,13 +36,13 @@ return {
       })
     end,
   },
-  -- Solarized: Readable colorscheme
-  {
-    'altercation/vim-colors-solarized',
-    config = function()
-      -- Solarized colorscheme
-      vim.o.background = 'dark' -- or 'dark'
-      vim.cmd 'colorscheme solarized'
-    end,
-  },
+  --  -- Solarized: Readable colorscheme
+  --  {
+  --    'altercation/vim-colors-solarized',
+  --    config = function()
+  --      -- Solarized colorscheme
+  --      vim.o.background = 'dark' -- or 'dark'
+  --      vim.cmd 'colorscheme solarized'
+  --    end,
+  --  },
 }
